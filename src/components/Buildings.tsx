@@ -1,29 +1,23 @@
 import { TransformControls } from "@react-three/drei";
+import { RigidBody } from "@react-three/rapier";
 import { useRef } from "react";
 
-/**
- * Bu bileşen, buildings dizisindeki her yapıyı sahnede gösterir.
- * Her yapı kendi TransformControls'u ile hareket ettirilebilir.
- */
 function Buildings({ buildings }) {
   return (
     <>
-      {buildings.map((building) => {
-        return (
-          <SingleBuilding
-            key={building.id}
-            id={building.id}
-            type={building.type}
-            initialPosition={building.position}
-          />
-        );
-      })}
+      {buildings.map((building) => (
+        <SingleBuilding
+          key={building.id}
+          id={building.id}
+          type={building.type}
+          initialPosition={building.position}
+        />
+      ))}
     </>
   );
 }
 
 function SingleBuilding({ id, type, initialPosition }) {
-  const transformRef = useRef(null);
   const meshRef = useRef(null);
 
   let color;
@@ -42,11 +36,19 @@ function SingleBuilding({ id, type, initialPosition }) {
   }
 
   return (
-    <TransformControls ref={transformRef} mode="translate">
-      <mesh ref={meshRef} position={initialPosition}>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial color={color} />
-      </mesh>
+    <TransformControls>
+      <RigidBody
+        position={[0, 3, 0]}
+        colliders="cuboid"
+        restitution={0.2}
+        friction={0.7}
+        type="dynamic"
+      >
+        <mesh ref={meshRef}>
+          <boxGeometry args={[1, 1, 1]} />
+          <meshStandardMaterial color={color} />
+        </mesh>
+      </RigidBody>
     </TransformControls>
   );
 }

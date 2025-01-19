@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import Experience from "./components/Experience";
 import Card from "./components/Card";
+import { Physics } from "@react-three/rapier";
 
 function App() {
-  // buildings: sahneye eklenen tüm yapıların bilgilerini tutan dizi
   const [buildings, setBuildings] = useState([]);
 
   const addBuilding = (type: string) => {
@@ -13,15 +13,21 @@ function App() {
       {
         id: Date.now(),
         type,
-        position: [0, 0, 0], // başlangıç konumu
+        position: [0, 5, 0],
       },
     ]);
   };
 
   return (
     <>
-      <Canvas camera={{ fov: 45, near: 0.1, far: 200, position: [-4, 3, 6] }}>
-        <Experience buildings={buildings} />
+      <Canvas
+        camera={{ fov: 45, near: 0.1, far: 200, position: [-10, 10, 30] }}
+      >
+        <Suspense>
+          <Physics gravity={[0, -9.81, 0]}>
+            <Experience buildings={buildings} />
+          </Physics>
+        </Suspense>
       </Canvas>
 
       <div className="fixed bottom-10 flex gap-4 w-full">
