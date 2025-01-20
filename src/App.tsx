@@ -2,24 +2,34 @@ import { useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import Scene from "./components/Scene";
 import Card from "./components/Card";
+import { Sky } from "@react-three/drei";
 
 function App() {
   const [buildings, setBuildings] = useState([]);
-
   const [selectedType, setSelectedType] = useState(null);
 
   const addBuilding = (x, z) => {
-    if (!["house", "shop", "factory"].includes(selectedType)) return;
+    setBuildings((prev) => {
+      const existingBuilding = prev.find((b) => b.x === x && b.z === z);
 
-    setBuildings((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        type: selectedType,
-        x,
-        z,
-      },
-    ]);
+      if (existingBuilding) {
+        return prev.map((b) =>
+          b.x === x && b.z === z ? { ...b, level: (b.level || 1) + 1 } : b
+        );
+      } else if (["house", "shop", "factory"].includes(selectedType)) {
+        return [
+          ...prev,
+          {
+            id: Date.now(),
+            type: selectedType,
+            x,
+            z,
+            level: 1,
+          },
+        ];
+      }
+      return prev;
+    });
   };
 
   const handleCardSelect = (type) => {
@@ -34,6 +44,7 @@ function App() {
           fov: 50,
         }}
       >
+        <Sky />
         <Scene
           selectedType={selectedType}
           buildings={buildings}
@@ -42,37 +53,14 @@ function App() {
       </Canvas>
 
       <div className="fixed bottom-10 w-full flex gap-4 justify-center">
-        <Card
-          label="Road"
-          onClick={() => handleCardSelect("road")}
-          isSelected={selectedType === "road"}
-        />
-        <Card
-          label="Water"
-          onClick={() => handleCardSelect("water")}
-          isSelected={selectedType === "water"}
-        />
-        <Card
-          label="Green"
-          onClick={() => handleCardSelect("green")}
-          isSelected={selectedType === "green"}
-        />
-
-        <Card
-          label="House"
-          onClick={() => handleCardSelect("house")}
-          isSelected={selectedType === "house"}
-        />
-        <Card
-          label="Shop"
-          onClick={() => handleCardSelect("shop")}
-          isSelected={selectedType === "shop"}
-        />
-        <Card
-          label="Factory"
-          onClick={() => handleCardSelect("factory")}
-          isSelected={selectedType === "factory"}
-        />
+        {["Road", "Water", "Green", "House", "Shop", "Factory"].map((label) => (
+          <Card
+            key={label}
+            label={label}
+            onClick={() => handleCardSelect(label.toLowerCase())}
+            isSelected={selectedType === label.toLowerCase()}
+          />
+        ))}
       </div>
     </div>
   );

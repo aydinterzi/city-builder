@@ -3,15 +3,17 @@ import { OrbitControls } from "@react-three/drei";
 import { useRef, useState } from "react";
 import * as THREE from "three";
 import Buildings from "./Buildings";
+import Particles from "./Particles";
 
 function Scene({ selectedType, buildings, addBuilding }) {
   const { camera, scene } = useThree();
-
   const GRID_SIZE = 20;
 
   const [cells, setCells] = useState(() =>
     Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(null))
   );
+
+  const [particleEffects, setParticleEffects] = useState([]);
 
   const raycaster = useRef(new THREE.Raycaster());
   const mouse = useRef(new THREE.Vector2());
@@ -41,6 +43,17 @@ function Scene({ selectedType, buildings, addBuilding }) {
           });
         } else if (["house", "shop", "factory"].includes(selectedType)) {
           addBuilding(gridX, gridZ);
+
+          setParticleEffects((prev) => [
+            ...prev,
+            {
+              id: Date.now(),
+              position: [gridX - 10 + 0.5, 1, gridZ - 10 + 0.5],
+            },
+          ]);
+          setTimeout(() => {
+            setParticleEffects((prev) => prev.slice(1));
+          }, 1000);
         }
       }
     }
@@ -78,6 +91,9 @@ function Scene({ selectedType, buildings, addBuilding }) {
       )}
 
       <Buildings buildings={buildings} />
+      {particleEffects.map((effect) => (
+        <Particles key={effect.id} position={effect.position} />
+      ))}
     </>
   );
 }
